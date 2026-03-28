@@ -25,19 +25,19 @@ A Flask REST API for managing a mechanic shop, including:
 
 ```text
 mechanic-shop/
-├── app.py
-├── models.py
-├── requirements.txt
-├── mechanic/
-│   ├── __init__.py
-│   ├── routes.py
-│   └── schemas.py
-├── service_ticket/
-│   ├── __init__.py
-│   ├── routes.py
-│   └── schemas.py
-└── postman/
-    └── mechanic-shop.postman_collection.json
+|-- app.py
+|-- models.py
+|-- requirements.txt
+|-- mechanic/
+|   |-- __init__.py
+|   |-- routes.py
+|   `-- schemas.py
+|-- service_ticket/
+|   |-- __init__.py
+|   |-- routes.py
+|   `-- schemas.py
+`-- postman/
+    `-- mechanic-shop.postman_collection.json
 ```
 
 ## Setup
@@ -85,7 +85,9 @@ Main models:
 - `Member`
 - `Mechanic`
 - `ServiceTicket`
+- `Inventory`
 - `service_mechanics` (association table for ticket-mechanic many-to-many)
+- `service_ticket_parts` (association table for ticket-part many-to-many)
 
 ## API Endpoints
 
@@ -111,7 +113,8 @@ Create payload example:
 {
   "name": "Jane Doe",
   "email": "jane@example.com",
-  "phone": "555-1234"
+  "phone": "555-1234",
+  "password": "password123"
 }
 ```
 
