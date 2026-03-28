@@ -10,14 +10,22 @@ service_mechanics = db.Table('service_mechanics',
     db.Column('mechanic_id', db.Integer, db.ForeignKey('mechanics.id'), primary_key=True)
 )
 
+# Association table for many-to-many relationship between service_tickets and inventory
+service_ticket_parts = db.Table(
+    'service_ticket_parts',
+    db.Column('ticket_id', db.Integer, db.ForeignKey('service_tickets.id'), primary_key=True),
+    db.Column('inventory_id', db.Integer, db.ForeignKey('inventory.id'), primary_key=True),
+)
+
 # Customer Model
 class Customer(db.Model):
     __tablename__ = 'customers'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False, unique=True)
     phone = db.Column(db.String(255), nullable=False)
+    password = db.Column(db.String(255), nullable=False)
 
     # One-to-Many relationship: One customer can have many service tickets
     service_tickets = db.relationship('ServiceTicket', backref='customer', lazy=True)
@@ -37,6 +45,8 @@ class ServiceTicket(db.Model):
 
     # Many-to-Many relationship: A ticket can have multiple mechanics, and a mechanic can work on multiple tickets
     mechanics = db.relationship('Mechanic', secondary=service_mechanics, backref='service_tickets', lazy=True)
+    # Many-to-Many relationship: A ticket can require multiple parts, and parts can be used on many tickets
+    parts = db.relationship('Inventory', secondary=service_ticket_parts, backref='service_tickets', lazy=True)
 
     def __repr__(self):
         return f'<ServiceTicket {self.id} - VIN: {self.VIN}>'
@@ -47,12 +57,23 @@ class Mechanic(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    email = db.Column(db.String(255), nullable=False)
+    email = db.Column(db.String(255), nullable=False, unique=True)
     phone = db.Column(db.String(255), nullable=False)
     salary = db.Column(db.Float, nullable=False)
 
     def __repr__(self):
         return f'<Mechanic {self.name}>'
+
+
+class Inventory(db.Model):
+    __tablename__ = 'inventory'
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    price = db.Column(db.Float, nullable=False)
+
+    def __repr__(self):
+        return f'<Inventory {self.name}>'
 
 # Member Model
 class Member(db.Model):

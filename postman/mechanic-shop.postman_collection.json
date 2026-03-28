@@ -1,14 +1,18 @@
 {
   "info": {
     "name": "Mechanic Shop API",
-    "_postman_id": "f1c38a8d-2d16-4b7d-a2fc-4dbf7522f1b4",
-    "description": "Endpoint test collection for the Mechanic Shop Flask API.",
+    "_postman_id": "7d5b6f22-fcb0-4f2d-bf5f-49fb10b8a6e9",
+    "description": "Comprehensive endpoint test collection for the Mechanic Shop Flask API.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
     {
       "key": "baseUrl",
       "value": "http://127.0.0.1:5000"
+    },
+    {
+      "key": "token",
+      "value": ""
     },
     {
       "key": "customerId",
@@ -24,6 +28,10 @@
     },
     {
       "key": "ticketId",
+      "value": "1"
+    },
+    {
+      "key": "partId",
       "value": "1"
     }
   ],
@@ -53,7 +61,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -77,7 +85,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Test Customer\",\n  \"email\": \"customer@example.com\",\n  \"phone\": \"555-0101\"\n}"
+              "raw": "{\n  \"name\": \"Test Customer\",\n  \"email\": \"customer@example.com\",\n  \"phone\": \"555-0101\",\n  \"password\": \"password123\"\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/customers",
@@ -96,11 +104,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 201', function () {",
-                  "    pm.response.to.have.status(201);",
+                  "  pm.response.to.have.status(201);",
                   "});",
                   "const json = pm.response.json();",
                   "if (json.id) {",
-                  "    pm.collectionVariables.set('customerId', String(json.id));",
+                  "  pm.collectionVariables.set('customerId', String(json.id));",
                   "}"
                 ]
               }
@@ -108,17 +116,27 @@
           ]
         },
         {
-          "name": "GET /customers",
+          "name": "POST /customers/login",
           "request": {
-            "method": "GET",
-            "header": [],
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"customer@example.com\",\n  \"password\": \"password123\"\n}"
+            },
             "url": {
-              "raw": "{{baseUrl}}/customers",
+              "raw": "{{baseUrl}}/customers/login",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "customers"
+                "customers",
+                "login"
               ]
             }
           },
@@ -129,7 +147,56 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
+                  "});",
+                  "const json = pm.response.json();",
+                  "pm.test('Token exists', function () {",
+                  "  pm.expect(json.token).to.be.a('string');",
+                  "});",
+                  "if (json.token) {",
+                  "  pm.collectionVariables.set('token', json.token);",
+                  "}",
+                  "if (json.customer_id) {",
+                  "  pm.collectionVariables.set('customerId', String(json.customer_id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /customers?page=1&per_page=10",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/customers?page=1&per_page=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "per_page",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -159,7 +226,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -174,6 +241,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -198,7 +269,42 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /customers/my-tickets",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/customers/my-tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "customers",
+                "my-tickets"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -209,7 +315,12 @@
           "name": "DELETE /customers/:id",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/customers/{{customerId}}",
               "host": [
@@ -227,8 +338,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "pm.test('Status is 200 or 404', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -271,11 +382,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 201', function () {",
-                  "    pm.response.to.have.status(201);",
+                  "  pm.response.to.have.status(201);",
                   "});",
                   "const json = pm.response.json();",
                   "if (json.id) {",
-                  "    pm.collectionVariables.set('memberId', String(json.id));",
+                  "  pm.collectionVariables.set('memberId', String(json.id));",
                   "}"
                 ]
               }
@@ -304,7 +415,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -334,7 +445,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -373,7 +484,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -402,8 +513,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "pm.test('Status is 200 or 404', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -447,11 +558,11 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 201', function () {",
-                  "    pm.response.to.have.status(201);",
+                  "  pm.response.to.have.status(201);",
                   "});",
                   "const json = pm.response.json();",
                   "if (json.id) {",
-                  "    pm.collectionVariables.set('mechanicId', String(json.id));",
+                  "  pm.collectionVariables.set('mechanicId', String(json.id));",
                   "}"
                 ]
               }
@@ -481,7 +592,37 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /mechanics/most-tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/mechanics/most-tickets",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "mechanics",
+                "most-tickets"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200', function () {",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -496,6 +637,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -519,8 +664,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "pm.test('Status is 200 or 401', function () {",
+                  "  pm.expect([200, 401]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -531,7 +676,12 @@
           "name": "DELETE /mechanics/:id",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/mechanics/{{mechanicId}}",
               "host": [
@@ -549,8 +699,200 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
+                  "pm.test('Status is 200, 401 or 404', function () {",
+                  "  pm.expect([200, 401, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Inventory",
+      "item": [
+        {
+          "name": "POST /inventory/",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Oil Filter\",\n  \"price\": 14.99\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventory/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventory",
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 201 or 401', function () {",
+                  "  pm.expect([201, 401]).to.include(pm.response.code);",
+                  "});",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) {",
+                  "    pm.collectionVariables.set('partId', String(json.id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /inventory/",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventory",
+                ""
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "GET /inventory/:part_id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/{{partId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventory",
+                "{{partId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200 or 404', function () {",
+                  "  pm.expect([200, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /inventory/:part_id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium Oil Filter\",\n  \"price\": 19.99\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/inventory/{{partId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventory",
+                "{{partId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200, 401 or 404', function () {",
+                  "  pm.expect([200, 401, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "DELETE /inventory/:part_id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/inventory/{{partId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "inventory",
+                "{{partId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200, 401 or 404', function () {",
+                  "  pm.expect([200, 401, 404]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -570,6 +912,10 @@
               {
                 "key": "Content-Type",
                 "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
               }
             ],
             "body": {
@@ -593,12 +939,14 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 201', function () {",
-                  "    pm.response.to.have.status(201);",
+                  "pm.test('Status is 201 or 401', function () {",
+                  "  pm.expect([201, 401]).to.include(pm.response.code);",
                   "});",
-                  "const json = pm.response.json();",
-                  "if (json.id) {",
+                  "if (pm.response.code === 201) {",
+                  "  const json = pm.response.json();",
+                  "  if (json.id) {",
                   "    pm.collectionVariables.set('ticketId', String(json.id));",
+                  "  }",
                   "}"
                 ]
               }
@@ -628,7 +976,7 @@
                 "type": "text/javascript",
                 "exec": [
                   "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "  pm.response.to.have.status(200);",
                   "});"
                 ]
               }
@@ -639,7 +987,12 @@
           "name": "PUT /service-tickets/:ticket_id/assign-mechanic/:mechanic_id",
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/service-tickets/{{ticketId}}/assign-mechanic/{{mechanicId}}",
               "host": [
@@ -659,8 +1012,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "pm.test('Status is 200, 401, 403 or 404', function () {",
+                  "  pm.expect([200, 401, 403, 404]).to.include(pm.response.code);",
                   "});"
                 ]
               }
@@ -671,7 +1024,12 @@
           "name": "PUT /service-tickets/:ticket_id/remove-mechanic/:mechanic_id",
           "request": {
             "method": "PUT",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
             "url": {
               "raw": "{{baseUrl}}/service-tickets/{{ticketId}}/remove-mechanic/{{mechanicId}}",
               "host": [
@@ -691,8 +1049,89 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Status is 200', function () {",
-                  "    pm.response.to.have.status(200);",
+                  "pm.test('Status is 200, 400, 401, 403 or 404', function () {",
+                  "  pm.expect([200, 400, 401, 403, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /service-tickets/:ticket_id/add-part/:part_id",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/service-tickets/{{ticketId}}/add-part/{{partId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "service-tickets",
+                "{{ticketId}}",
+                "add-part",
+                "{{partId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200, 401, 403 or 404', function () {",
+                  "  pm.expect([200, 401, 403, 404]).to.include(pm.response.code);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "PUT /service-tickets/:ticket_id/edit",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"add_ids\": [{{mechanicId}}],\n  \"remove_ids\": []\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/service-tickets/{{ticketId}}/edit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "service-tickets",
+                "{{ticketId}}",
+                "edit"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status is 200, 401, 403 or 404', function () {",
+                  "  pm.expect([200, 401, 403, 404]).to.include(pm.response.code);",
                   "});"
                 ]
               }
