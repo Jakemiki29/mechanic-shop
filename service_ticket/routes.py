@@ -13,15 +13,11 @@ def create_service_ticket(customer_id):
     try:
         data = request.get_json()
 
-        requested_customer_id = data.get('customer_id')
-        if requested_customer_id != customer_id:
-            return jsonify({'error': 'You can only create tickets for your own account'}), 403
-
         new_ticket = ServiceTicket(
             VIN=data['VIN'],
             service_date=data['service_date'],
             service_desc=data['service_desc'],
-            customer_id=data['customer_id']
+            customer_id=customer_id
         )
         db.session.add(new_ticket)
         db.session.commit()

@@ -12,7 +12,14 @@ from models import Mechanic, db, service_mechanics
 def create_mechanic():
     """Create a new mechanic"""
     try:
-        data = request.get_json()
+        data = request.get_json() or {}
+        required_fields = ['name', 'email', 'phone', 'salary']
+        if any(field not in data for field in required_fields):
+            return jsonify({'error': 'name, email, phone, and salary are required'}), 400
+
+        if Mechanic.query.filter_by(email=data['email']).first():
+            return jsonify({'error': 'Email already exists'}), 400
+
         new_mechanic = Mechanic(
             name=data['name'],
             email=data['email'],
