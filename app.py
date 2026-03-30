@@ -23,6 +23,9 @@ ma.init_app(app)
 cache.init_app(app)
 limiter.init_app(app)
 
+with app.app_context():
+    db.create_all()
+
 app.register_blueprint(customer_bp, url_prefix="/customers")
 app.register_blueprint(mechanic_bp, url_prefix="/mechanics")
 app.register_blueprint(inventory_bp, url_prefix="/inventory")
@@ -118,7 +121,4 @@ def delete_member(member_id):
 
 
 if __name__ == "__main__":
-    with app.app_context():
-        db.create_all()
-        print("Database tables created successfully!")
     app.run(debug=True)
