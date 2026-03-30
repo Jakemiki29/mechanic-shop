@@ -7,17 +7,19 @@ from models import db, ServiceTicket, Mechanic, Inventory
 
 # Create a new service ticket
 @service_ticket_bp.route('/', methods=['POST'])
-@token_required
-def create_service_ticket(customer_id):
+def create_service_ticket():
     """Create a new service ticket"""
     try:
         data = request.get_json()
+        required_fields = ['VIN', 'service_date', 'service_desc', 'customer_id']
+        if any(field not in data for field in required_fields):
+            return jsonify({'error': 'VIN, service_date, service_desc, and customer_id are required'}), 400
 
         new_ticket = ServiceTicket(
             VIN=data['VIN'],
             service_date=data['service_date'],
             service_desc=data['service_desc'],
-            customer_id=customer_id
+            customer_id=data['customer_id']
         )
         db.session.add(new_ticket)
         db.session.commit()

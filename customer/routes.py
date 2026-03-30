@@ -43,17 +43,7 @@ def get_customers():
 
     pagination = Customer.query.order_by(Customer.id.asc()).paginate(page=page, per_page=per_page, error_out=False)
 
-    return jsonify(
-        {
-            "items": customers_schema.dump(pagination.items),
-            "total": pagination.total,
-            "page": pagination.page,
-            "pages": pagination.pages,
-            "per_page": pagination.per_page,
-            "has_next": pagination.has_next,
-            "has_prev": pagination.has_prev,
-        }
-    ), 200
+    return jsonify(customers_schema.dump(pagination.items)), 200
 
 
 @customer_bp.route("/<int:customer_id>", methods=["GET"])
