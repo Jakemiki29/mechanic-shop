@@ -12,3 +12,6 @@ instance/
 
 # VS Code
 .vscode/
+
+# Environment variables
+.env
