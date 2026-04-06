@@ -10,6 +10,7 @@ from flask import Flask, jsonify, request
 from flask_swagger import swagger as get_swagger_spec
 from flask_swagger_ui import get_swaggerui_blueprint
 
+
 from config import ProductionConfig
 from customer import customer_bp
 from extensions import cache, limiter
